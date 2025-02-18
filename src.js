@@ -3,6 +3,17 @@ const icon_width = 79,
   num_icons = 9,
   time_per_icon = 100,
   indexes = [0, 0, 0];
+iconMap = [
+  "banana",
+  "seven",
+  "cherry",
+  "plum",
+  "orange",
+  "bell",
+  "bar",
+  "lemon",
+  "melon",
+];
 
 const roll = (reel, offset = 0) => {
   const delta =
@@ -18,16 +29,29 @@ const roll = (reel, offset = 0) => {
       backgroundPositionY + delta * icon_height
     }px`;
 
-    setTimeout(() => {}, 8 + delta * time_per_icon);
+    setTimeout(() => {
+      resolve(delta % num_icons);
+    }, 8 + delta * time_per_icon);
   });
 };
 
 function rollAll() {
   const reelsList = document.querySelectorAll(".slots > .reel");
-  [...reelsList].map((reel, i) => {
-    console.log(reel, i);
-    roll(reel, i);
+  Promise.all([...reelsList].map((reel, i) => roll(reel, i))).then(deltas => {
+    deltas.forEach(
+      (delta, i) => (indexes[i] = (indexes[i] + delta) % num_icons)
+    );
+    console.log(indexes);
+
+    // check win conditions
+    setTimeout(rollAll, 10000);
   });
+  // [...reelsList].map((reel, i) => {
+  //   console.log(reel, i);
+  //   roll(reel, i).then(delta => {
+  //     console.log(delta);
+  //   });
+  // });
 }
 
 rollAll();
